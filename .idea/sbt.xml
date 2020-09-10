@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ScalaSbtSettings">
+    <option name="customVMPath" />
+    <option name="linkedExternalProjectsSettings">
+      <SbtProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/project" />
+          </set>
+        </option>
+        <option name="sbtVersion" value="1.2.8" />
+      </SbtProjectSettings>
+    </option>
+    <option name="vmParameters" value="-Xms1024m -Xmx2048M -XX:MaxPermSize=1024 -Dhttp.proxyHost=192.168.16.1 -Dhttp.proxyHost=8080 -Dsbt.override.build.repos=true -Dsbt.repository.config=./project/repositories" />
+  </component>
+</project>

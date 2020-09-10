@@ -1,0 +1,45 @@
+package au.com.zip.producer
+
+import java.util.{Properties, UUID}
+import au.com.zip.admin._
+import au.com.zip.encoders.{CardRequestKey, CardRequestValue}
+import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, ProducerRecord}
+
+object CardTransactionProducer extends App {
+  new CardTransactionProducer
+}
+
+class CardTransactionProducer {
+
+  val topic = cardRequestTopic
+  val props = new Properties()
+  props.put("bootstrap.servers", "localhost:9092")
+  props.put("key.serializer", "au.com.zip.encoders.SimpleCaseClassSerializer")
+  props.put("value.serializer", "au.com.zip.encoders.SimpleCaseClassSerializer")
+  props.put(ProducerConfig.ACKS_CONFIG, "all")
+
+  val producer: KafkaProducer[CardRequestKey, CardRequestValue] = new KafkaProducer(props)
+  val id = UUID.randomUUID().toString
+
+  try {
+    Seq(
+      new ProducerRecord(topic, CardRequestKey("CustID2", "1", "1", "2020-01-20"), CardRequestValue(10.0, "VendorA")),
+      new ProducerRecord(topic, CardRequestKey("CustID2", "2", "2", "2020-01-22"), CardRequestValue(20.0, "VendorB")),
+      new ProducerRecord(topic, CardRequestKey("CustID2", "3", "3", "2020-01-23"), CardRequestValue(30.0, "VendorC")),
+      new ProducerRecord(topic, CardRequestKey("CustID2", "4", "4", "2020-01-24"), CardRequestValue(20.0, "VendorA")),
+      new ProducerRecord(topic, CardRequestKey("CustID3", "5", "5", "2020-01-25"), CardRequestValue(20.0, "VendorA")),
+      new ProducerRecord(topic, CardRequestKey("CustID1", "6", "6", "2020-01-26"), CardRequestValue(20.0, "VendorB")),
+      new ProducerRecord(topic, CardRequestKey("CustID2", "7", "7", "2020-01-27"), CardRequestValue(20.0, "VendorC"))
+    ).foreach(e => {
+      producer.send(e)
+      println(s"Sent Message ${e.key().requestId}")
+    })
+  }
+  catch {
+    case e: Exception => producer.abortTransaction()
+      e.printStackTrace()
+  }
+
+  producer.close()
+
+}

@@ -1,0 +1,16 @@
+# Git files
+*.orig
+
+# Scala files
+*.sc
+
+# Output folders
+target/
+*/target/
+.history
+.cache
+.idea
+*.log
+log/
+tmp/
+*.iml

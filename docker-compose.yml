@@ -1,0 +1,66 @@
+version: "3"
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.2.1
+    hostname: zookeeper
+    ports:
+      - '2181:2181'
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    extra_hosts:
+      - "moby:127.0.0.1"
+
+  kafka:
+    image: confluentinc/cp-enterprise-kafka:5.2.1
+    hostname: kafka
+    ports:
+      - '9092:9092'
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: kafka:9092
+      CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT: zookeeper:2181
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      CONFLUENT_METRICS_ENABLE: 'true'
+      CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
+    extra_hosts:
+      - "moby:127.0.0.1"
+
+  kafka-topics:
+    image: confluentinc/cp-kafka:5.2.1
+    depends_on:
+      - kafka
+    command: "bash -c 'echo Waiting for Kafka to be ready... && \
+                           cub kafka-ready -b kafka:9092 1 20 && \
+                           kafka-topics --create --topic card-request --if-not-exists --zookeeper zookeeper:2181 --partitions 2 --replication-factor 1 && \
+                           kafka-topics --create --topic card-authorization-response --if-not-exists --zookeeper zookeeper:2181 --partitions 2 --replication-factor 1 && \
+                           kafka-topics --create --topic card-success --if-not-exists --zookeeper zookeeper:2181 --partitions 2 --replication-factor 1 && \
+                           kafka-topics --create --topic card-declines --if-not-exists --zookeeper zookeeper:2181 --partitions 2 --replication-factor 1 && \
+                           kafka-topics --create --topic card-undefined --if-not-exists --zookeeper zookeeper:2181 --partitions 2 --replication-factor 1 && \
+                           kafka-topics --create --topic daily-success-aggregates --if-not-exists --zookeeper zookeeper:2181 --partitions 2 --replication-factor 1 && \
+                           kafka-topics --create --topic daily-declined-aggregates --if-not-exists --zookeeper zookeeper:2181 --partitions 2 --replication-factor 1 && \
+                           sleep infinity'"
+    environment:
+      # The following settings are listed here only to satisfy the image's requirements.
+      # We override the image's `command` anyways, hence this container will not start a broker.
+      KAFKA_BROKER_ID: ignored
+      KAFKA_ZOOKEEPER_CONNECT: ignored
+    extra_hosts:
+        - "moby:127.0.0.1"
+
+  kafka-producers:
+    image: zip-coding-challenge:latest
+    depends_on:
+      - kafka-topics
+    command: "bash -c 'echo Waiting for Kafka to be ready... && \
+                           java -cp /opt/lib/zip-coding-challenge-assembly-0.1.0-SNAPSHOT.jar \
+                           au.com.zip.producer.PaymentGatewayProducer'"
