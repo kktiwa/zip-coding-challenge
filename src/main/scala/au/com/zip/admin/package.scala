@@ -25,12 +25,4 @@ package object admin {
   val declined = "Declined"
   val undefined = "Undefined"
 
-  val bannedVendors = Seq("VendorA", "VendorB", "VendorC")
-
-  val creditLimit: Map[String, Double] = Map(
-    "CustID1" -> 100.0,
-    "CustID2" -> 999999.9,
-    "CustID3" -> 20.0
-  )
-
 }

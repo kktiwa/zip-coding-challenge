@@ -1,8 +1,7 @@
 package au.com.zip.producer
 
-import java.util.{Properties, UUID}
 import au.com.zip.admin._
-import au.com.zip.encoders.{CardAuthorizationResponse, CardRequestKey, CardRequestValue}
+import au.com.zip.encoders.{CardAuthorizationResponse, CardRequestKey}
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, ProducerRecord}
 
 object PaymentGatewayProducer extends App {
@@ -11,12 +10,12 @@ object PaymentGatewayProducer extends App {
 
 class PaymentGatewayProducer {
 
-  val topic = cardAuthorizedTopic
-  val props = new Properties()
-  props.put("bootstrap.servers", "localhost:9092")
+  val props = createBaseProps()
   props.put("key.serializer", "au.com.zip.encoders.SimpleCaseClassSerializer")
   props.put("value.serializer", "au.com.zip.encoders.SimpleCaseClassSerializer")
   props.put(ProducerConfig.ACKS_CONFIG, "all")
+
+  val topic = cardAuthorizedTopic
 
   val producer: KafkaProducer[CardRequestKey, CardAuthorizationResponse] = new KafkaProducer(props)
 
