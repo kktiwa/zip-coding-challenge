@@ -6,7 +6,7 @@ import au.com.zip.admin._
 import au.com.zip.encoders.{CardAuthorizationResponse, CardRequestKey}
 import org.apache.kafka.clients.consumer.{ConsumerRecords, KafkaConsumer}
 
-object PaymentGatewayConsumer extends App {
+object AuthorizedTransactionConsumer extends App {
   new PaymentGatewayConsumer
 }
 
