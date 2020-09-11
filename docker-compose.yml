@@ -31,6 +31,7 @@ services:
       CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: kafka:29092
       CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT: zookeeper:32181
       CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       CONFLUENT_METRICS_ENABLE: 'true'
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
     extra_hosts:
@@ -41,7 +42,7 @@ services:
     depends_on:
       - kafka
     command: "bash -c 'echo Waiting for Kafka to be ready... && \
-                           cub kafka-ready -b kafka:9092 1 20 && \
+                           cub kafka-ready -b kafka:29092 1 20 && \
                            kafka-topics --create --topic card-request --if-not-exists --zookeeper zookeeper:32181 --partitions 2 --replication-factor 1 && \
                            kafka-topics --create --topic card-authorization-response --if-not-exists --zookeeper zookeeper:32181 --partitions 2 --replication-factor 1 && \
                            kafka-topics --create --topic card-success --if-not-exists --zookeeper zookeeper:32181 --partitions 2 --replication-factor 1 && \
@@ -66,15 +67,19 @@ services:
     command: "bash -c 'echo Waiting for Kafka to be ready... && \
                            java -cp /opt/lib/zip-coding-challenge-assembly-0.1.0-SNAPSHOT.jar \
                            au.com.zip.producer.PaymentGatewayProducer'"
+    extra_hosts:
+      - "moby:127.0.0.1"
 
-  kafka-gateway-response-consumer:
+  kafka-consumers:
     image: zip-coding-challenge:latest
     depends_on:
       - kafka
       - kafka-topics
     command: "bash -c 'echo Waiting for Kafka to be ready... && \
                                java -cp /opt/lib/zip-coding-challenge-assembly-0.1.0-SNAPSHOT.jar \
-                               au.com.zip.consumer.PaymentGatewayConsumer'"
+                               au.com.zip.consumer.AuthorizedTransactionConsumer'"
+    extra_hosts:
+      - "moby:127.0.0.1"
 
   kafka-daily-aggregates-stream:
     image: zip-coding-challenge:latest
@@ -84,6 +89,8 @@ services:
     command: "bash -c 'echo Waiting for Kafka to be ready... && \
                                  java -cp /opt/lib/zip-coding-challenge-assembly-0.1.0-SNAPSHOT.jar \
                                  au.com.zip.stream.DailyAggregatesStream'"
+    extra_hosts:
+      - "moby:127.0.0.1"
 
   kafka-monthly-aggregates-stream:
     image: zip-coding-challenge:latest
@@ -93,3 +100,5 @@ services:
     command: "bash -c 'echo Waiting for Kafka to be ready... && \
                                  java -cp /opt/lib/zip-coding-challenge-assembly-0.1.0-SNAPSHOT.jar \
                                  au.com.zip.stream.MonthlyAggregatesStream'"
+    extra_hosts:
+      - "moby:127.0.0.1"
