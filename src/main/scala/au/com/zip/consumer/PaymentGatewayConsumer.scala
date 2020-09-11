@@ -6,11 +6,11 @@ import au.com.zip.admin._
 import au.com.zip.encoders.{CardAuthorizationResponse, CardRequestKey}
 import org.apache.kafka.clients.consumer.{ConsumerRecords, KafkaConsumer}
 
-object AuthorizedTransactionConsumer extends App {
-  new AuthorizedTransactionConsumer
+object PaymentGatewayConsumer extends App {
+  new PaymentGatewayConsumer
 }
 
-class AuthorizedTransactionConsumer {
+class PaymentGatewayConsumer {
 
   val props = createBaseProps()
   props.put("key.deserializer", "au.com.zip.encoders.SimpleCaseClassDeserializer")
