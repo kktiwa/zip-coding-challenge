@@ -1,6 +1,0 @@
-[0m[[0m[31merror[0m] [0m[0m/Users/ktiwary/projects/forked/zip-coding-challenge/src/main/scala/au/com/zip/stream/DailyAggregatesStream.scala:39:32: type mismatch;[0m
-[0m[[0m[31merror[0m] [0m[0m found   : (org.apache.kafka.common.serialization.Serde[String], org.apache.kafka.common.serialization.Serde[String])[0m
-[0m[[0m[31merror[0m] [0m[0m required: org.apache.kafka.common.serialization.Serde[(String, String)][0m
-[0m[[0m[31merror[0m] [0m[0m    .groupByKey(Grouped.`with`((ScalaSerdes.String, ScalaSerdes.String), ScalaSerdes.Long))[0m
-[0m[[0m[31merror[0m] [0m[0m                               ^[0m
-[0m[[0m[31merror[0m] [0m[0mone error found[0m
