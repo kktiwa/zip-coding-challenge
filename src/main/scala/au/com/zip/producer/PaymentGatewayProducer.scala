@@ -1,7 +1,7 @@
 package au.com.zip.producer
 
 import au.com.zip.admin._
-import au.com.zip.encoders.{CardAuthorizationResponse, CardRequestKey}
+import au.com.zip.encoders._
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, ProducerRecord}
 
 object PaymentGatewayProducer extends App {
@@ -14,10 +14,9 @@ class PaymentGatewayProducer {
   producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "au.com.zip.encoders.SimpleCaseClassSerializer")
   producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "au.com.zip.encoders.SimpleCaseClassSerializer")
   producerProperties.put(ProducerConfig.ACKS_CONFIG, "all")
+  val producer: KafkaProducer[CardRequestKey, CardAuthorizationResponse] = new KafkaProducer(producerProperties)
 
   val topic = cardAuthorizedTopic
-
-  val producer: KafkaProducer[CardRequestKey, CardAuthorizationResponse] = new KafkaProducer(producerProperties)
 
   try {
     Seq(

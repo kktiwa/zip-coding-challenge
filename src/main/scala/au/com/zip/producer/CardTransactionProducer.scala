@@ -1,8 +1,8 @@
 package au.com.zip.producer
 
-import java.util.{Properties, UUID}
+import java.util.UUID
 import au.com.zip.admin._
-import au.com.zip.encoders.{CardRequestKey, CardRequestValue}
+import au.com.zip.encoders._
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, ProducerRecord}
 
 object CardTransactionProducer extends App {
@@ -11,14 +11,13 @@ object CardTransactionProducer extends App {
 
 class CardTransactionProducer {
 
-  val topic = cardRequestTopic
-  val props = new Properties()
-  props.put("bootstrap.servers", "localhost:9092")
-  props.put("key.serializer", "au.com.zip.encoders.SimpleCaseClassSerializer")
-  props.put("value.serializer", "au.com.zip.encoders.SimpleCaseClassSerializer")
+  val props = createBaseProps()
+  props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "au.com.zip.encoders.SimpleCaseClassSerializer")
+  props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "au.com.zip.encoders.SimpleCaseClassSerializer")
   props.put(ProducerConfig.ACKS_CONFIG, "all")
-
   val producer: KafkaProducer[CardRequestKey, CardRequestValue] = new KafkaProducer(props)
+
+  val topic = cardRequestTopic
   val id = UUID.randomUUID().toString
 
   try {

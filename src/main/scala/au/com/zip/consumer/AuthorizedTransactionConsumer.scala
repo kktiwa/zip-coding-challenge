@@ -3,7 +3,7 @@ package au.com.zip.consumer
 import java.time.Duration
 import scala.collection.JavaConverters._
 import au.com.zip.admin._
-import au.com.zip.encoders.{CardAuthorizationResponse, CardRequestKey}
+import au.com.zip.encoders._
 import org.apache.kafka.clients.consumer.{ConsumerRecords, KafkaConsumer}
 
 object AuthorizedTransactionConsumer extends App {
