@@ -10,14 +10,14 @@ object PaymentGatewayProducer extends App {
 
 class PaymentGatewayProducer {
 
-  val props = createBaseProps()
-  props.put("key.serializer", "au.com.zip.encoders.SimpleCaseClassSerializer")
-  props.put("value.serializer", "au.com.zip.encoders.SimpleCaseClassSerializer")
-  props.put(ProducerConfig.ACKS_CONFIG, "all")
+  val producerProperties = createBaseProps()
+  producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "au.com.zip.encoders.SimpleCaseClassSerializer")
+  producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "au.com.zip.encoders.SimpleCaseClassSerializer")
+  producerProperties.put(ProducerConfig.ACKS_CONFIG, "all")
 
   val topic = cardAuthorizedTopic
 
-  val producer: KafkaProducer[CardRequestKey, CardAuthorizationResponse] = new KafkaProducer(props)
+  val producer: KafkaProducer[CardRequestKey, CardAuthorizationResponse] = new KafkaProducer(producerProperties)
 
   try {
     Seq(

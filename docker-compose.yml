@@ -65,6 +65,7 @@ services:
       - kafka
       - kafka-topics
     command: "bash -c 'echo Waiting for Kafka to be ready... && \
+                           cub kafka-ready -b kafka:29092 1 20 && \
                            java -cp /opt/lib/zip-coding-challenge-assembly-0.1.0-SNAPSHOT.jar \
                            au.com.zip.producer.PaymentGatewayProducer'"
     extra_hosts:
@@ -76,6 +77,7 @@ services:
       - kafka
       - kafka-topics
     command: "bash -c 'echo Waiting for Kafka to be ready... && \
+                               cub kafka-ready -b kafka:29092 1 20 && \
                                java -cp /opt/lib/zip-coding-challenge-assembly-0.1.0-SNAPSHOT.jar \
                                au.com.zip.consumer.AuthorizedTransactionConsumer'"
     extra_hosts:
@@ -87,6 +89,7 @@ services:
       - kafka
       - kafka-topics
     command: "bash -c 'echo Waiting for Kafka to be ready... && \
+                                 cub kafka-ready -b kafka:29092 1 20 && \
                                  java -cp /opt/lib/zip-coding-challenge-assembly-0.1.0-SNAPSHOT.jar \
                                  au.com.zip.stream.DailyAggregatesStream'"
     extra_hosts:
@@ -98,6 +101,7 @@ services:
       - kafka
       - kafka-topics
     command: "bash -c 'echo Waiting for Kafka to be ready... && \
+                                 cub kafka-ready -b kafka:29092 1 20 && \
                                  java -cp /opt/lib/zip-coding-challenge-assembly-0.1.0-SNAPSHOT.jar \
                                  au.com.zip.stream.MonthlyAggregatesStream'"
     extra_hosts:

@@ -2,6 +2,8 @@ package au.com.zip
 
 import java.util.Properties
 
+import org.apache.kafka.clients.producer.ProducerConfig
+
 package object admin {
 
   val cardRequestTopic = "card-request"
@@ -16,7 +18,7 @@ package object admin {
 
   def createBaseProps(): Properties = {
     val props = new Properties()
-    props.put("bootstrap.servers", "localhost:9092")
+    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:29092")
     props
   }
 
