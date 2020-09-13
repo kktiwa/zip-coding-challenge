@@ -1,8 +1,6 @@
 package au.com.zip.stream
 
 import java.time.Duration
-import java.util.Properties
-
 import au.com.zip.admin._
 import au.com.zip.encoders._
 import org.apache.kafka.streams.kstream._
