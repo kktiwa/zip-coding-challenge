@@ -37,14 +37,17 @@ Table of Contents
 <a name="parking-lot"/>
 
 ### Parking Lot
-* Unit testing streams
+* Unit testing streams logic
 * Using Kafka Connect to sink out the aggregate metrics to an external storage
 * Add a REST API to read the metrics values
-* Use a config library to specify windows, timeouts etc
+* Use a config library (e.g. pureconfig) to specify windows, timeouts etc
+* Add logging
+* Fix docker compose setup
 * Use of EnumEntry instead of strings
 
 <a name="improvements"/>
 
 ### Improvements
 * Use confluent kafka
+* Use schema registry
 * Use avro format
