@@ -4,7 +4,7 @@ import java.time.Duration
 import scala.collection.JavaConverters._
 import au.com.zip.admin._
 import au.com.zip.encoders._
-import org.apache.kafka.clients.consumer.{ConsumerRecords, KafkaConsumer}
+import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecords, KafkaConsumer}
 
 object AuthorizedTransactionConsumer extends App {
   new PaymentGatewayConsumer
@@ -13,9 +13,9 @@ object AuthorizedTransactionConsumer extends App {
 class PaymentGatewayConsumer {
 
   val props = createBaseProps()
-  props.put("key.deserializer", "au.com.zip.encoders.SimpleCaseClassDeserializer")
-  props.put("value.deserializer", "au.com.zip.encoders.SimpleCaseClassDeserializer")
-  props.put("group.id", "TransactionConsumerTest")
+  props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "au.com.zip.encoders.SimpleCaseClassDeserializer")
+  props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "au.com.zip.encoders.SimpleCaseClassDeserializer")
+  props.put(ConsumerConfig.GROUP_ID_CONFIG, "TransactionConsumerTest")
   val topics = Seq(cardAuthorizedTopic)
 
   val consumer: KafkaConsumer[CardRequestKey, CardAuthorizationResponse] = new KafkaConsumer[CardRequestKey, CardAuthorizationResponse](props)
