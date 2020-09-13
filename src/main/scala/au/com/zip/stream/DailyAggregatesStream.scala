@@ -1,7 +1,6 @@
 package au.com.zip.stream
 
 import java.time.Duration
-import java.util.Properties
 import au.com.zip.admin._
 import au.com.zip.encoders._
 import org.apache.kafka.common.serialization.Serdes
@@ -15,9 +14,8 @@ object DailyAggregatesStream extends App {
 
   import org.apache.kafka.streams.StreamsConfig
 
-  val props = new Properties()
-  props.put(StreamsConfig.APPLICATION_ID_CONFIG, "AuthorisationV3")
-  props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
+  val props = createBaseProps()
+  props.put(StreamsConfig.APPLICATION_ID_CONFIG, applicationId)
   props.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, "0")
 
 
@@ -28,18 +26,18 @@ object DailyAggregatesStream extends App {
   val cardSuccessStream: KStream[CardRequestKey, CardAuthorizationResponse] = builder.stream(successfulTransactionsTopic, Consumed.`with`(cardRequestKeySerde, cardAuthorizationResponseSerde))
   val cardDeclinedStream: KStream[CardRequestKey, CardAuthorizationResponse] = builder.stream(declinedTransactionsTopic, Consumed.`with`(cardRequestKeySerde, cardAuthorizationResponseSerde))
 
-  val timeWindow = TimeWindows.of(Duration.ofDays(1)).grace(Duration.ofHours(5))
+  //val timeWindow = TimeWindows.of(Duration.ofDays(1)).grace(Duration.ofHours(5))
+  val timeWindow = TimeWindows.of(Duration.ofMinutes(1)).grace(Duration.ofHours(1))
   val windowSerde = new WindowedSerdes.TimeWindowedSerde(ScalaSerdes.String)
 
   val streams = new KafkaStreams(builder.build(), props)
   streams.start()
 
-  //((req.cardNumber, req.txnDateTime)
   cardSuccessStream
     .map((req, _) => (req.cardNumber, 1L))
     .groupByKey(Grouped.`with`(ScalaSerdes.String, ScalaSerdes.Long))
     .windowedBy(timeWindow)
-    .count()(Materialized.as("daily-success-aggregate-store"))
+    .count()(Materialized.as(dailySuccessAggregateStore))
     .toStream
     .to(dailySuccessAggregatesTopic)(Produced.`with`(windowSerde, ScalaSerdes.Long))
 
@@ -49,7 +47,7 @@ object DailyAggregatesStream extends App {
     .map((req, _) => (req.cardNumber, 1L))
     .groupByKey(Grouped.`with`(ScalaSerdes.String, ScalaSerdes.Long))
     .windowedBy(timeWindow)
-    .count()(Materialized.as("daily-declines-aggregate-store"))
+    .count()(Materialized.as(dailyDeclinesAggregateStore))
     .toStream
     .to(dailyDeclinesAggregatesTopic)(Produced.`with`(windowSerde, ScalaSerdes.Long))
 

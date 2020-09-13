@@ -12,15 +12,19 @@ package object admin {
   val declinedTransactionsTopic = "card-declines"
   val undefinedTransactionsTopic = "card-undefined"
 
-  //topics for aggregated metrics
+  //store/topics for aggregated metrics
   val dailySuccessAggregatesTopic = "daily-success-aggregates"
   val dailyDeclinesAggregatesTopic = "daily-declined-aggregates"
+  val dailySuccessAggregateStore = "daily-success-aggregate-store"
+  val dailyDeclinesAggregateStore = "daily-declined-aggregate-store"
 
   def createBaseProps(): Properties = {
     val props = new Properties()
     props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
     props
   }
+
+  val applicationId = "card-payments"
 
   //TODO:Use Enums
   val approved = "Approved"

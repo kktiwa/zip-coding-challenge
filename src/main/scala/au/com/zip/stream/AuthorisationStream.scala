@@ -17,9 +17,8 @@ object AuthorisationStream extends App {
 
   import org.apache.kafka.streams.StreamsConfig
 
-  val props = new Properties()
-  props.put(StreamsConfig.APPLICATION_ID_CONFIG, "AuthorisationV2")
-  props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
+  val props = createBaseProps()
+  props.put(StreamsConfig.APPLICATION_ID_CONFIG, applicationId)
   props.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, "0")
 
   implicit val stringSerde = Serdes.String

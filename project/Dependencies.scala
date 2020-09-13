@@ -6,6 +6,7 @@ object Dependencies {
   val enumeratumVersion = "1.5.13"
   val kafkaVersion = "2.2.0"
   val typesafeLogVersion = "3.1.0"
+  val scalaTestVersion = "3.0.5"
 
   lazy val kafka = Seq(
     "org.apache.kafka" %% "kafka-streams-scala",
@@ -13,8 +14,11 @@ object Dependencies {
   ).map(_ % kafkaVersion)
 
   lazy val enumeratum = "com.beachape" %% "enumeratum" % enumeratumVersion
-  lazy val kafkaStreamsTest = "org.apache.kafka" % "kafka-streams-test-utils" % kafkaVersion % Test
 
-  lazy val dependencies = Seq(enumeratum) ++ kafka
+  // test dependencies
+  lazy val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion
+  lazy val kafkaTest = "org.apache.kafka" % "kafka-streams-test-utils" % kafkaVersion % Test
+
+  lazy val dependencies = Seq(enumeratum, kafkaTest) ++ kafka
 
 }

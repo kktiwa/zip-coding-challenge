@@ -29,7 +29,7 @@ class PaymentGatewayProducer {
       new ProducerRecord(topic, CardRequestKey("CustID2", "7", "7", "2020-01-27"), CardAuthorizationResponse("7", declined, ""))
     ).foreach(e => {
       producer.send(e)
-      println(s"Sent Message ${e.key().requestId}")
+      println(s"Payment gateway sent message ${e.key().requestId}")
     })
   }
   catch {

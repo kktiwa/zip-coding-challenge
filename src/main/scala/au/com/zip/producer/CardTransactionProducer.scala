@@ -31,7 +31,7 @@ class CardTransactionProducer {
       new ProducerRecord(topic, CardRequestKey("CustID2", "7", "7", "2020-01-27"), CardRequestValue(20.0, "VendorC"))
     ).foreach(e => {
       producer.send(e)
-      println(s"Sent Message ${e.key().requestId}")
+      println(s"Card transaction sent message ${e.key().requestId}")
     })
   }
   catch {
