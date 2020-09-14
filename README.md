@@ -16,6 +16,7 @@ Implement the generation of daily and monthly reports.
 Table of Contents
 
 * [Requirements](#requirements)
+* [Tech Stack](#tech-stack)
 * [Packaging and running](#packaging-and-running)
 * [Parking Lot](#parking-lot)
 * [Improvements](#improvements)
@@ -27,6 +28,15 @@ Table of Contents
 ### Requirements
 * You need to have docker installed to run the program using docker-compose
 * You will need to install Kafka binaries locally if you want to run it locally
+
+<a name="tech-stack"/>
+
+### Tech Stack
+* Scala
+* SBT
+* Docker
+* Postgres Database
+* Kafka with KStream & KTable APIs
 
 <a name="packaging-and-running"/>
 
