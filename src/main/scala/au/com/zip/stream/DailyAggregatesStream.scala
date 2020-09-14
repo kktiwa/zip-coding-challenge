@@ -20,12 +20,12 @@ object DailyAggregatesStream extends App {
 
 
   implicit val cardRequestKeySerde = Serdes.serdeFrom(new SimpleCaseClassSerializer[CardRequestKey], new SimpleCaseClassDeserializer[CardRequestKey])
-  implicit val cardAuthorizationResponseSerde = Serdes.serdeFrom(new SimpleCaseClassSerializer[CardAuthorizationResponse], new SimpleCaseClassDeserializer[CardAuthorizationResponse])
+  implicit val gatewayResponseSerde = Serdes.serdeFrom(new SimpleCaseClassSerializer[GatewayResponse], new SimpleCaseClassDeserializer[GatewayResponse])
   implicit val cardGroupingKeySerde = Serdes.serdeFrom(new SimpleCaseClassSerializer[DailyCardGroupingKey], new SimpleCaseClassDeserializer[DailyCardGroupingKey])
 
   val builder = new StreamsBuilder()
-  val cardSuccessStream: KStream[CardRequestKey, CardAuthorizationResponse] = builder.stream(successfulTransactionsTopic, Consumed.`with`(cardRequestKeySerde, cardAuthorizationResponseSerde))
-  val cardDeclinedStream: KStream[CardRequestKey, CardAuthorizationResponse] = builder.stream(declinedTransactionsTopic, Consumed.`with`(cardRequestKeySerde, cardAuthorizationResponseSerde))
+  val cardSuccessStream: KStream[CardRequestKey, GatewayResponse] = builder.stream(successfulTransactionsTopic, Consumed.`with`(cardRequestKeySerde, gatewayResponseSerde))
+  val cardDeclinedStream: KStream[CardRequestKey, GatewayResponse] = builder.stream(declinedTransactionsTopic, Consumed.`with`(cardRequestKeySerde, gatewayResponseSerde))
 
   //This time window can be changed based on how recent updates are required
   val timeWindow = TimeWindows.of(Duration.ofDays(1))

@@ -19,7 +19,17 @@ case class MonthlyCardGroupingKey(cardNumber: String,
                                   month: Int
                                  )
 
-case class CardAuthorizationResponse(requestId: String,
+case class GatewayResponse(requestId: String,
+                           cardNumber: String,
+                           txnDateTime: String, //yyyyMMdd
+                           status: String,
+                           reason: String
+                          )
+
+case class CardAuthorizationResponse(cardNumber: String,
+                                     requestId: String,
+                                     value: Double,
+                                     vendor: String,
                                      status: String,
                                      reason: String
                                     )

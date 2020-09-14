@@ -19,12 +19,12 @@ class PaymentGatewayConsumer {
   props.put(ConsumerConfig.GROUP_ID_CONFIG, "payment-gateway-consumer")
   val topics = Seq(cardAuthorizedTopic)
 
-  val consumer: KafkaConsumer[CardRequestKey, CardAuthorizationResponse] = new KafkaConsumer[CardRequestKey, CardAuthorizationResponse](props)
+  val consumer: KafkaConsumer[CardRequestKey, GatewayResponse] = new KafkaConsumer[CardRequestKey, GatewayResponse](props)
   consumer.subscribe(topics.asJava)
   println(s"Subscribing to topics: ${topics.mkString(", ")}")
 
   while (true) {
-    val records: ConsumerRecords[CardRequestKey, CardAuthorizationResponse] = consumer.poll(Duration.ofMillis(100))
+    val records: ConsumerRecords[CardRequestKey, GatewayResponse] = consumer.poll(Duration.ofMillis(100))
     records.iterator().asScala.foreach(record => {
       val key = record.key()
       val response = record.value()

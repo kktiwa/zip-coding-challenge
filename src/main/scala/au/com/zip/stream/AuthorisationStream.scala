@@ -22,35 +22,40 @@ object AuthorisationStream extends App {
   implicit val stringSerde = Serdes.String
   implicit val cardRequestKeySerde = Serdes.serdeFrom(new SimpleCaseClassSerializer[CardRequestKey], new SimpleCaseClassDeserializer[CardRequestKey])
   implicit val cardRequestValueSerde = Serdes.serdeFrom(new SimpleCaseClassSerializer[CardRequestValue], new SimpleCaseClassDeserializer[CardRequestValue])
-  implicit val cardAuthorizationResponseSerde = Serdes.serdeFrom(new SimpleCaseClassSerializer[CardAuthorizationResponse], new SimpleCaseClassDeserializer[CardAuthorizationResponse])
+  implicit val gatewayResponseSerde = Serdes.serdeFrom(new SimpleCaseClassSerializer[GatewayResponse], new SimpleCaseClassDeserializer[GatewayResponse])
+  implicit val authorizationResponseSerde = Serdes.serdeFrom(new SimpleCaseClassSerializer[CardAuthorizationResponse], new SimpleCaseClassDeserializer[CardAuthorizationResponse])
 
   val builder = new StreamsBuilder()
   val cardRequestStream: KStream[CardRequestKey, CardRequestValue] = builder.stream(cardRequestTopic, Consumed.`with`(cardRequestKeySerde, cardRequestValueSerde))
-  val cardResponseStream: KStream[CardRequestKey, CardAuthorizationResponse] = builder.stream(cardAuthorizedTopic, Consumed.`with`(cardRequestKeySerde, cardAuthorizationResponseSerde))
+  val cardResponseStream: KStream[CardRequestKey, GatewayResponse] = builder.stream(cardAuthorizedTopic, Consumed.`with`(cardRequestKeySerde, gatewayResponseSerde))
 
   val successfulTransactions: KStream[CardRequestKey, CardAuthorizationResponse] = cardRequestStream
-    .join(cardResponseStream.filter((_, b) => b.status == approved))(joinF, JoinWindows.of(Duration.ofMinutes(1)))(Joined.`with`(cardRequestKeySerde, cardRequestValueSerde, cardAuthorizationResponseSerde))
+    .join(cardResponseStream.filter((_, b) => b.status == approved))(joinResult, JoinWindows.of(Duration.ofMinutes(1)))(Joined.`with`(cardRequestKeySerde, cardRequestValueSerde, gatewayResponseSerde))
 
-  successfulTransactions.to(successfulTransactionsTopic)(Produced.`with`(cardRequestKeySerde, cardAuthorizationResponseSerde))
+  successfulTransactions.to(successfulTransactionsTopic)(Produced.`with`(cardRequestKeySerde, authorizationResponseSerde))
   println(s"Successfully written to topic $successfulTransactionsTopic")
 
   val declinedTransactions: KStream[CardRequestKey, CardAuthorizationResponse] = cardRequestStream
-    .join(cardResponseStream.filter((_, b) => b.status == declined))(joinF2, JoinWindows.of(Duration.ofMinutes(1)))(Joined.`with`(cardRequestKeySerde, cardRequestValueSerde, cardAuthorizationResponseSerde))
+    .join(cardResponseStream.filter((_, b) => b.status == declined))(joinResult, JoinWindows.of(Duration.ofMinutes(1)))(Joined.`with`(cardRequestKeySerde, cardRequestValueSerde, gatewayResponseSerde))
 
-  declinedTransactions.to(declinedTransactionsTopic)(Produced.`with`(cardRequestKeySerde, cardAuthorizationResponseSerde))
+  declinedTransactions.to(declinedTransactionsTopic)(Produced.`with`(cardRequestKeySerde, authorizationResponseSerde))
   println(s"Successfully written to topic $declinedTransactionsTopic")
+
+  val allTransactionsStream = cardRequestStream
+    .join(cardResponseStream)(joinResult, JoinWindows.of(Duration.ofMinutes(1)))(Joined.`with`(cardRequestKeySerde, cardRequestValueSerde, gatewayResponseSerde))
 
   val streams = new KafkaStreams(builder.build(), props)
   streams.start()
 
-  def joinF(checkA: CardRequestValue, checkB: CardAuthorizationResponse): CardAuthorizationResponse = {
-    assert(checkB.status == approved)
-    checkB
-  }
-
-  def joinF2(checkA: CardRequestValue, checkB: CardAuthorizationResponse): CardAuthorizationResponse = {
-    assert(checkB.status == declined)
-    checkB
+  def joinResult(requestValue: CardRequestValue, gatewayResponse: GatewayResponse): CardAuthorizationResponse = {
+    CardAuthorizationResponse(
+      gatewayResponse.cardNumber,
+      gatewayResponse.requestId,
+      requestValue.value,
+      requestValue.vendor,
+      gatewayResponse.status,
+      gatewayResponse.reason
+    )
   }
 
   sys.ShutdownHookThread {

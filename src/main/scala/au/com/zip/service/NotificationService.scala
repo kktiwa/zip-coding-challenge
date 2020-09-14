@@ -1,10 +1,10 @@
 package au.com.zip.service
 
-import au.com.zip.encoders.CardAuthorizationResponse
+import au.com.zip.encoders.GatewayResponse
 
 case class Notification(customerId: String,
                         txnDate: String,
-                        cardAuthorizationResponse: CardAuthorizationResponse
+                        cardAuthorizationResponse: GatewayResponse
                        )
 
 object NotificationService {
