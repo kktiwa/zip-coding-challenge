@@ -26,13 +26,14 @@ Table of Contents
 
 ### Requirements
 * You need to have docker installed to run the program using docker-compose
-* You can run the program locally without docker by installing kafka binaries
+* You will need to install Kafka binaries locally if you want to run it locally
 
 <a name="packaging-and-running"/>
 
 ### Packaging and running
 * You need to run sbt assembly to create the assembly JAR
 * Next, you can run docker-compose up -d which will run all services in an ordered manner
+* You can also run the program locally without docker by installing kafka binaries
 
 <a name="parking-lot"/>
 
