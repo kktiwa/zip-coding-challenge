@@ -1,12 +1,10 @@
 package au.com.zip.stream
 
 import java.time.Duration
-
 import au.com.zip.util.UtilityFunctions._
 import org.apache.kafka.streams.scala.{Serdes => ScalaSerdes}
-import au.com.zip.admin.{applicationId, createBaseProps, dailySuccessAggregateStore, dailySuccessAggregatesTopic, declinedTransactionsTopic, monthlyDeclinesAggregatesStore, monthlyDeclinesAggregatesTopic, monthlySuccessAggregatesStore, monthlySuccessAggregatesTopic, successfulTransactionsTopic}
+import au.com.zip.admin.{applicationId, createBaseProps, declinedTransactionsTopic, monthlyDeclinesAggregatesStore, monthlyDeclinesAggregatesTopic, monthlySuccessAggregatesStore, monthlySuccessAggregatesTopic, successfulTransactionsTopic}
 import au.com.zip.encoders.{CardAuthorizationResponse, CardRequestKey, MonthlyCardGroupingKey, SimpleCaseClassDeserializer, SimpleCaseClassSerializer}
-import au.com.zip.stream.DailyAggregatesStream.streams
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.{KafkaStreams, StreamsBuilder}
 import org.apache.kafka.streams.kstream.{Consumed, Materialized, TimeWindows, WindowedSerdes}
