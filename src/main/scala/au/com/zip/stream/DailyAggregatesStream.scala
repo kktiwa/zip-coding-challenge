@@ -21,20 +21,21 @@ object DailyAggregatesStream extends App {
 
   implicit val cardRequestKeySerde = Serdes.serdeFrom(new SimpleCaseClassSerializer[CardRequestKey], new SimpleCaseClassDeserializer[CardRequestKey])
   implicit val cardAuthorizationResponseSerde = Serdes.serdeFrom(new SimpleCaseClassSerializer[CardAuthorizationResponse], new SimpleCaseClassDeserializer[CardAuthorizationResponse])
-  implicit val cardGroupingKeySerde = Serdes.serdeFrom(new SimpleCaseClassSerializer[CardGroupingKey], new SimpleCaseClassDeserializer[CardGroupingKey])
+  implicit val cardGroupingKeySerde = Serdes.serdeFrom(new SimpleCaseClassSerializer[DailyCardGroupingKey], new SimpleCaseClassDeserializer[DailyCardGroupingKey])
 
   val builder = new StreamsBuilder()
   val cardSuccessStream: KStream[CardRequestKey, CardAuthorizationResponse] = builder.stream(successfulTransactionsTopic, Consumed.`with`(cardRequestKeySerde, cardAuthorizationResponseSerde))
   val cardDeclinedStream: KStream[CardRequestKey, CardAuthorizationResponse] = builder.stream(declinedTransactionsTopic, Consumed.`with`(cardRequestKeySerde, cardAuthorizationResponseSerde))
 
-  val timeWindow = TimeWindows.of(Duration.ofDays(1)).grace(Duration.ofHours(5))
+  //This time window can be changed based on how recent updates are required
+  val timeWindow = TimeWindows.of(Duration.ofDays(1))
   val windowSerde = new WindowedSerdes.TimeWindowedSerde(cardGroupingKeySerde)
 
   val streams = new KafkaStreams(builder.build(), props)
   streams.start()
 
   cardSuccessStream
-    .map((req, _) => (CardGroupingKey(req.cardNumber, req.txnDateTime), 1L))
+    .map((req, _) => (DailyCardGroupingKey(req.cardNumber, req.txnDateTime), 1L))
     .groupByKey(Grouped.`with`(cardGroupingKeySerde, ScalaSerdes.Long))
     .windowedBy(timeWindow)
     .count()(Materialized.as(dailySuccessAggregateStore))
@@ -44,7 +45,7 @@ object DailyAggregatesStream extends App {
   println(s"Successfully written to topic $dailySuccessAggregatesTopic")
 
   cardDeclinedStream
-    .map((req, _) => (CardGroupingKey(req.cardNumber, req.txnDateTime), 1L))
+    .map((req, _) => (DailyCardGroupingKey(req.cardNumber, req.txnDateTime), 1L))
     .groupByKey(Grouped.`with`(cardGroupingKeySerde, ScalaSerdes.Long))
     .windowedBy(timeWindow)
     .count()(Materialized.as(dailyDeclinesAggregateStore))

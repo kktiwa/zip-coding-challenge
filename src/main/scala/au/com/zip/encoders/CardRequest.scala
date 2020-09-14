@@ -11,9 +11,13 @@ case class CardRequestValue(value: Double,
                             vendor: String
                            )
 
-case class CardGroupingKey(cardNumber: String,
-                           txnDateTime: String
-                          )
+case class DailyCardGroupingKey(cardNumber: String,
+                                txnDateTime: String
+                               )
+
+case class MonthlyCardGroupingKey(cardNumber: String,
+                                  month: Int
+                                 )
 
 case class CardAuthorizationResponse(requestId: String,
                                      status: String,

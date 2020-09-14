@@ -18,6 +18,11 @@ package object admin {
   val dailySuccessAggregateStore = "daily-success-aggregate-store"
   val dailyDeclinesAggregateStore = "daily-declined-aggregate-store"
 
+  val monthlySuccessAggregatesTopic = "monthly-success-aggregates"
+  val monthlySuccessAggregatesStore = "monthly-success-aggregate-store"
+  val monthlyDeclinesAggregatesStore = "monthly-declines-aggregate-store"
+  val monthlyDeclinesAggregatesTopic = "monthly-declines-aggregates"
+
   def createBaseProps(): Properties = {
     val props = new Properties()
     props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
