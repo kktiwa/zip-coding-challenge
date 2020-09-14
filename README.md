@@ -49,7 +49,7 @@ Table of Contents
 
 ### Parking Lot
 * Unit testing streams logic
-* Using Kafka Connect to sink out the aggregate metrics to an external storage
+* Using Kafka Connect to sink out the aggregate metrics to an external storage (e.g:Postgres)
 * Add a REST API to read the metrics values
 * Use a config library (e.g. pureconfig) to specify windows, timeouts etc
 * Add logging
