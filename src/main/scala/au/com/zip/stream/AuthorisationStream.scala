@@ -41,8 +41,11 @@ object AuthorisationStream extends App {
   declinedTransactions.to(declinedTransactionsTopic)(Produced.`with`(cardRequestKeySerde, authorizationResponseSerde))
   println(s"Successfully written to topic $declinedTransactionsTopic")
 
-  val allTransactionsStream = cardRequestStream
+  val allTransactions = cardRequestStream
     .join(cardResponseStream)(joinResult, JoinWindows.of(Duration.ofMinutes(1)))(Joined.`with`(cardRequestKeySerde, cardRequestValueSerde, gatewayResponseSerde))
+
+  allTransactions.to(allTransactionsTopic)(Produced.`with`(cardRequestKeySerde, authorizationResponseSerde))
+  println(s"Successfully written to topic $allTransactionsTopic")
 
   val streams = new KafkaStreams(builder.build(), props)
   streams.start()

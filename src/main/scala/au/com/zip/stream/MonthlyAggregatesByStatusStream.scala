@@ -3,8 +3,8 @@ package au.com.zip.stream
 import java.time.Duration
 import au.com.zip.util.UtilityFunctions._
 import org.apache.kafka.streams.scala.{Serdes => ScalaSerdes}
-import au.com.zip.admin.{applicationId, createBaseProps, declinedTransactionsTopic, monthlyDeclinesAggregatesStore, monthlyDeclinesAggregatesTopic, monthlySuccessAggregatesStore, monthlySuccessAggregatesTopic, successfulTransactionsTopic}
-import au.com.zip.encoders.{GatewayResponse, CardRequestKey, MonthlyCardGroupingKey, SimpleCaseClassDeserializer, SimpleCaseClassSerializer}
+import au.com.zip.admin.{allTransactionsTopic, applicationId, createBaseProps, declinedTransactionsTopic, monthlyAllStatusAggregatesStore, monthlyAllStatusAggregatesTopic, monthlyDeclinesAggregatesStore, monthlyDeclinesAggregatesTopic, monthlySuccessAggregatesStore, monthlySuccessAggregatesTopic, successfulTransactionsTopic}
+import au.com.zip.encoders.{CardRequestKey, GatewayResponse, MonthlyCardGroupingKey, SimpleCaseClassDeserializer, SimpleCaseClassSerializer}
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.{KafkaStreams, StreamsBuilder}
 import org.apache.kafka.streams.kstream.{Consumed, Materialized, TimeWindows, WindowedSerdes}
@@ -19,7 +19,6 @@ object MonthlyAggregatesByStatusStream extends App {
   props.put(StreamsConfig.APPLICATION_ID_CONFIG, applicationId)
   props.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, "0")
 
-
   implicit val cardRequestKeySerde = Serdes.serdeFrom(new SimpleCaseClassSerializer[CardRequestKey], new SimpleCaseClassDeserializer[CardRequestKey])
   implicit val cardAuthorizationResponseSerde = Serdes.serdeFrom(new SimpleCaseClassSerializer[GatewayResponse], new SimpleCaseClassDeserializer[GatewayResponse])
   implicit val cardGroupingKeySerde = Serdes.serdeFrom(new SimpleCaseClassSerializer[MonthlyCardGroupingKey], new SimpleCaseClassDeserializer[MonthlyCardGroupingKey])
@@ -27,6 +26,7 @@ object MonthlyAggregatesByStatusStream extends App {
   val builder = new StreamsBuilder()
   val cardSuccessStream: KStream[CardRequestKey, GatewayResponse] = builder.stream(successfulTransactionsTopic, Consumed.`with`(cardRequestKeySerde, cardAuthorizationResponseSerde))
   val cardDeclinedStream: KStream[CardRequestKey, GatewayResponse] = builder.stream(declinedTransactionsTopic, Consumed.`with`(cardRequestKeySerde, cardAuthorizationResponseSerde))
+  val cardAllStatusStream: KStream[CardRequestKey, GatewayResponse] = builder.stream(allTransactionsTopic, Consumed.`with`(cardRequestKeySerde, cardAuthorizationResponseSerde))
 
   //This time window can be changed based on how recent updates are required
   val timeWindow = TimeWindows.of(Duration.ofDays(1))
@@ -55,6 +55,15 @@ object MonthlyAggregatesByStatusStream extends App {
 
   println(s"Successfully written to topic $monthlyDeclinesAggregatesTopic")
 
+  cardAllStatusStream
+    .map((req, _) => (MonthlyCardGroupingKey(req.cardNumber, getMonth(req.txnDateTime)), 1L))
+    .groupByKey(Grouped.`with`(cardGroupingKeySerde, ScalaSerdes.Long))
+    .windowedBy(timeWindow)
+    .count()(Materialized.as(monthlyAllStatusAggregatesStore))
+    .toStream
+    .to(monthlyAllStatusAggregatesTopic)(Produced.`with`(windowSerde, ScalaSerdes.Long))
+
+  println(s"Successfully written to topic $monthlyAllStatusAggregatesTopic")
 
   sys.ShutdownHookThread {
     streams.close(Duration.ofSeconds(10))

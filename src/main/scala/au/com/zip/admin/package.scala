@@ -1,7 +1,6 @@
 package au.com.zip
 
 import java.util.Properties
-
 import org.apache.kafka.clients.producer.ProducerConfig
 
 package object admin {
@@ -11,6 +10,7 @@ package object admin {
   val successfulTransactionsTopic = "card-success"
   val declinedTransactionsTopic = "card-declines"
   val undefinedTransactionsTopic = "card-undefined"
+  val allTransactionsTopic = "all-transactions"
 
   //store/topics for aggregated metrics
   val dailySuccessAggregatesTopic = "daily-success-aggregates"
@@ -22,6 +22,8 @@ package object admin {
   val monthlySuccessAggregatesStore = "monthly-success-aggregate-store"
   val monthlyDeclinesAggregatesStore = "monthly-declines-aggregate-store"
   val monthlyDeclinesAggregatesTopic = "monthly-declines-aggregates"
+  val monthlyAllStatusAggregatesStore = "monthly-all-aggregates-store"
+  val monthlyAllStatusAggregatesTopic = "monthly-all-status-aggregates"
 
   def createBaseProps(): Properties = {
     val props = new Properties()
