@@ -29,8 +29,10 @@ class PaymentGatewayConsumer {
     records.iterator().asScala.foreach(record => {
       val key = record.key()
       val response = record.value()
-      NotificationService.sendNotification(Notification(key.customerId, key.txnDateTime, response))
-      log(s"Customer ${key.customerId} \t Request ${key.requestId} is ${record.value().status} ${Option(record.value().reason).map(s => s"Reason : $s").getOrElse("")}")
+      //Send notification to customers for success and decline status
+      if (Seq(approved, declined).contains(response.status)) {
+        NotificationService.sendNotification(Notification(key.customerId, key.txnDateTime, response))
+      }
     })
   }
 }
