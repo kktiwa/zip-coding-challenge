@@ -7,7 +7,7 @@ import au.com.zip.encoders.{DailyCardGroupingKey, SimpleCaseClassDeserializer, S
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.{KafkaStreams, StreamsBuilder, StreamsConfig}
 import org.apache.kafka.streams.kstream.Printed
-import org.apache.kafka.streams.scala.kstream.Consumed
+import org.apache.kafka.streams.scala.kstream._
 
 object DailyAggregateConsumerStream extends App {
   new DailyAggregateConsumerStream
