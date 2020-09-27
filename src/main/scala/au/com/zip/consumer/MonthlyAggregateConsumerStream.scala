@@ -4,7 +4,8 @@ import java.time.Duration
 import au.com.zip.admin.{createBaseProps, monthlySuccessAggregatesTopic}
 import au.com.zip.encoders.{MonthlyCardGroupingKey, SimpleCaseClassDeserializer, SimpleCaseClassSerializer}
 import org.apache.kafka.common.serialization.Serdes
-import org.apache.kafka.streams.kstream.Printed
+import org.apache.kafka.streams.scala.{Serdes => ScalaSerdes}
+import org.apache.kafka.streams.kstream.{KStream, Printed}
 import org.apache.kafka.streams.scala.kstream.Consumed
 import org.apache.kafka.streams.{KafkaStreams, StreamsBuilder, StreamsConfig}
 
@@ -21,7 +22,7 @@ class MonthlyAggregateConsumerStream {
 
   implicit val cardGroupingKeySerde = Serdes.serdeFrom(new SimpleCaseClassSerializer[MonthlyCardGroupingKey], new SimpleCaseClassDeserializer[MonthlyCardGroupingKey])
 
-  builder.stream(monthlySuccessAggregatesTopic, Consumed.`with`(cardGroupingKeySerde, Serdes.Long))
+  builder.stream(monthlySuccessAggregatesTopic, Consumed.`with`(cardGroupingKeySerde, ScalaSerdes.Long))
     .print(Printed.toSysOut())
 
   val streams = new KafkaStreams(builder.build(), props)

@@ -1,8 +1,8 @@
 package au.com.zip.consumer
 
 import java.time.Duration
-
-import au.com.zip.admin.{applicationId, createBaseProps, dailySuccessAggregatesTopic}
+import org.apache.kafka.streams.scala.{Serdes => ScalaSerdes}
+import au.com.zip.admin.{createBaseProps, dailyDeclinesAggregatesTopic, dailySuccessAggregatesTopic}
 import au.com.zip.encoders.{DailyCardGroupingKey, SimpleCaseClassDeserializer, SimpleCaseClassSerializer}
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.{KafkaStreams, StreamsBuilder, StreamsConfig}
@@ -22,7 +22,10 @@ class DailyAggregateConsumerStream {
 
   implicit val cardGroupingKeySerde = Serdes.serdeFrom(new SimpleCaseClassSerializer[DailyCardGroupingKey], new SimpleCaseClassDeserializer[DailyCardGroupingKey])
 
-  builder.stream(dailySuccessAggregatesTopic, Consumed.`with`(cardGroupingKeySerde, Serdes.Long))
+  builder.stream(dailySuccessAggregatesTopic, Consumed.`with`(ScalaSerdes.String, ScalaSerdes.Long))
+    .print(Printed.toSysOut())
+
+  builder.stream(dailyDeclinesAggregatesTopic, Consumed.`with`(ScalaSerdes.String, ScalaSerdes.Long))
     .print(Printed.toSysOut())
 
   val streams = new KafkaStreams(builder.build(), props)
