@@ -62,6 +62,10 @@ docker-compose -f docker-compose.yml up -d
     1. DailyAggregateConsumerStream: This stream consumes data from topics written by `DailyAggregatesStream`
     2. MonthlyAggregateConsumerStream: This stream consumes data from topics written by `MonthlyAggregatesStream`
 
+![daily-aggregated-metrics](daily-aggregated-metrics.png)
+
+![monthly-aggregated-metrics](monthly-aggregated-metrics.png)
+
 ### Cleanup
 * If you don't have any other docker containers running, you can shut down the ones for this project with the following command:
 ```
