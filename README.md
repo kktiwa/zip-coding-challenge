@@ -1,5 +1,5 @@
 ## Card Payments Streams
-The project contains a potential solution for streaming credit card transactions and authorization reponses and producing daily and monthly aggregated metrics for it.
+The project contains a potential solution for streaming credit card transactions and authorization responses and producing daily and monthly aggregated metrics for it.
 
 ---
 
@@ -42,23 +42,38 @@ Table of Contents
 
 ### Packaging and running
 * You need to run `sbt assembly` to create the assembly JAR for the application
-Next, you can run below command which will run all services
+* You can run the program via docker using the below command, however, this is still not fully tested
 ```
-docker-compose -f docker-compose-kafka.yml up -d
+docker-compose -f docker-compose.yml up -d
 ```
-* You can also run the program locally without docker by installing kafka binaries
+* You can also run the program locally without docker by installing kafka binaries from `https://kafka.apache.org/downloads`
+  Currently, the application has been tested only with local kafka installation.
+* After installing Kafka locally, use the script `run-kafka.sh` from the `bin` directory of Kafka installation to start all services.
+* When running locally, the following order should be observed for running each part of the application:
+
+1. Producers
+      1. CardTransactionProducer: This producer creates card transactions
+      2. PaymentGatewayProducer: This producer creates payment gateway events
+2. Producer Streams
+    1. AuthorisationStream: This stream joins the incoming data from the above 2 producers and writes to different topics for metrics calculation
+    2. DailyAggregatesStream: This stream writes data to different topics after producing daily metrics for card transactions
+    3. MonthlyAggregatesStream: This stream writes data to different topics after producing monthly metrics for card transactions
+3. Consumer Streams
+    1. DailyAggregateConsumerStream: This stream consumes data from topics written by `DailyAggregatesStream`
+    2. MonthlyAggregateConsumerStream: This stream consumes data from topics written by `MonthlyAggregatesStream`
 
 ### Cleanup
-If you don't have any other docker containers running, you can shut down the ones for this project with the following command:
+* If you don't have any other docker containers running, you can shut down the ones for this project with the following command:
 ```
 docker stop $(docker ps -aq)
 ```
+* To shutdown locally running Kafka services, use the script `kill-kafka.sh`
 
 <a name="parking-lot"/>
 
 ### Parking Lot
 * Unit testing streams logic
-* Using Kafka Connect to sink out the aggregate metrics to an external storage (e.g:Postgres)
+* Using Kafka Connect to sink out the aggregate metrics to an external storage (e.g:Postgres/MySQL)
 * Add a REST API to read the metrics values
 * Use a config library (e.g. pureconfig) to specify windows, timeouts etc
 * Add logging
