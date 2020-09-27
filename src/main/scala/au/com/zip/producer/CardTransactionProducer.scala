@@ -3,6 +3,7 @@ package au.com.zip.producer
 import java.util.UUID
 import au.com.zip.admin._
 import au.com.zip.encoders._
+import au.com.zip.util.Logging.log
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, ProducerRecord}
 
 object CardTransactionProducer extends App {
@@ -22,16 +23,16 @@ class CardTransactionProducer {
 
   try {
     Seq(
-      new ProducerRecord(topic, CardRequestKey("CustID2", "1", "1", "2020-01-20"), CardRequestValue(10.0, "VendorA")),
-      new ProducerRecord(topic, CardRequestKey("CustID2", "2", "2", "2020-01-22"), CardRequestValue(20.0, "VendorB")),
-      new ProducerRecord(topic, CardRequestKey("CustID2", "3", "3", "2020-01-23"), CardRequestValue(30.0, "VendorC")),
-      new ProducerRecord(topic, CardRequestKey("CustID2", "4", "4", "2020-01-24"), CardRequestValue(20.0, "VendorA")),
-      new ProducerRecord(topic, CardRequestKey("CustID3", "5", "5", "2020-01-25"), CardRequestValue(20.0, "VendorA")),
-      new ProducerRecord(topic, CardRequestKey("CustID1", "6", "6", "2020-01-26"), CardRequestValue(20.0, "VendorB")),
-      new ProducerRecord(topic, CardRequestKey("CustID2", "7", "7", "2020-01-27"), CardRequestValue(20.0, "VendorC"))
+      new ProducerRecord(topic, CardRequestKey("CustID2", "1", "1", "2020-09-20"), CardRequestValue(10.0, "VendorA")),
+      new ProducerRecord(topic, CardRequestKey("CustID2", "2", "2", "2020-10-22"), CardRequestValue(20.0, "VendorB")),
+      new ProducerRecord(topic, CardRequestKey("CustID2", "3", "3", "2020-12-23"), CardRequestValue(30.0, "VendorC")),
+      new ProducerRecord(topic, CardRequestKey("CustID2", "4", "4", "2020-03-24"), CardRequestValue(20.0, "VendorA")),
+      new ProducerRecord(topic, CardRequestKey("CustID3", "5", "5", "2020-05-25"), CardRequestValue(20.0, "VendorA")),
+      new ProducerRecord(topic, CardRequestKey("CustID1", "6", "6", "2020-06-26"), CardRequestValue(20.0, "VendorB")),
+      new ProducerRecord(topic, CardRequestKey("CustID2", "7", "7", "2020-07-27"), CardRequestValue(20.0, "VendorC"))
     ).foreach(e => {
       producer.send(e)
-      println(s"Card transaction sent message ${e.key().requestId}")
+      log(s"Card transaction sent message ${e.key().requestId}")
     })
   }
   catch {

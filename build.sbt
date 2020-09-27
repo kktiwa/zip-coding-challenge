@@ -2,7 +2,7 @@ import Dependencies._
 
 name := "zip-coding-challenge"
 ThisBuild / organization := "au.com.zip"
-ThisBuild / scalaVersion := "2.12.8"
+ThisBuild / scalaVersion := "2.11.12"
 
 lazy val commonSettings = Seq(
   libraryDependencies := dependencies

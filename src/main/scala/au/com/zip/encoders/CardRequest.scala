@@ -4,7 +4,7 @@ package encoders
 case class CardRequestKey(customerId: String,
                           requestId: String,
                           cardNumber: String,
-                          txnDateTime: String, //yyyyMMdd
+                          txnDateTime: String //yyyy-MM-dd
                          )
 
 case class CardRequestValue(value: Double,
@@ -16,12 +16,12 @@ case class DailyCardGroupingKey(cardNumber: String,
                                )
 
 case class MonthlyCardGroupingKey(cardNumber: String,
-                                  month: Int
+                                  month: String
                                  )
 
 case class GatewayResponse(requestId: String,
                            cardNumber: String,
-                           txnDateTime: String, //yyyyMMdd
+                           txnDateTime: String, //yyyy-MM-dd
                            status: String,
                            reason: String
                           )

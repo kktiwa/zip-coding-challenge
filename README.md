@@ -41,9 +41,18 @@ Table of Contents
 <a name="packaging-and-running"/>
 
 ### Packaging and running
-* You need to run sbt assembly to create the assembly JAR
-* Next, you can run docker-compose up -d which will run all services in an ordered manner
+* You need to run `sbt assembly` to create the assembly JAR for the application
+Next, you can run below command which will run all services
+```
+docker-compose -f docker-compose-kafka.yml up -d
+```
 * You can also run the program locally without docker by installing kafka binaries
+
+### Cleanup
+If you don't have any other docker containers running, you can shut down the ones for this project with the following command:
+```
+docker stop $(docker ps -aq)
+```
 
 <a name="parking-lot"/>
 
