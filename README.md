@@ -28,15 +28,17 @@ Table of Contents
 ### Requirements
 * You need to have docker installed to run the program using docker-compose
 * You will need to install Kafka binaries locally if you want to run it locally
+  * Note: Currently, the application has been tested only with local kafka installation.
 
 <a name="tech-stack"/>
 
 ### Tech Stack
-* Scala
-* SBT
+* Scala version 2.11
+* SBT version 1.2.8
 * Docker
-* Postgres Database
-* Kafka with KStream & KTable APIs
+* MySQL Database
+* Kafka version 2.2 (using KStream & KTable APIs)
+* Kafka Connect
 
 <a name="packaging-and-running"/>
 
@@ -47,18 +49,19 @@ Table of Contents
 docker-compose -f docker-compose.yml up -d
 ```
 * You can also run the program locally without docker by installing kafka binaries from `https://kafka.apache.org/downloads`
-  Currently, the application has been tested only with local kafka installation.
 * After installing Kafka locally, use the script `run-kafka.sh` from the `bin` directory of Kafka installation to start all services.
 * When running locally, the following order should be observed for running each part of the application:
 
 1. Producers
-      1. CardTransactionProducer: This producer creates card transactions
-      2. PaymentGatewayProducer: This producer creates payment gateway events
-2. Producer Streams
+   1. CardTransactionProducer: This producer creates card transactions
+   2. PaymentGatewayProducer: This producer creates payment gateway events
+2. Consumers
+   1. AuthorizedTransactionConsumer: This consumer listens to incoming payment gateway responses to send notifications
+3. Producer Streams
     1. AuthorisationStream: This stream joins the incoming data from the above 2 producers and writes to different topics for metrics calculation
     2. DailyAggregatesStream: This stream writes data to different topics after producing daily metrics for card transactions
     3. MonthlyAggregatesStream: This stream writes data to different topics after producing monthly metrics for card transactions
-3. Consumer Streams
+4. Consumer Streams
     1. DailyAggregateConsumerStream: This stream consumes data from topics written by `DailyAggregatesStream`
     2. MonthlyAggregateConsumerStream: This stream consumes data from topics written by `MonthlyAggregatesStream`
 
@@ -71,7 +74,7 @@ docker-compose -f docker-compose.yml up -d
 ```
 docker stop $(docker ps -aq)
 ```
-* To shutdown locally running Kafka services, use the script `kill-kafka.sh`
+* To shut down locally running Kafka services, use the script `kill-kafka.sh`
 
 <a name="parking-lot"/>
 
