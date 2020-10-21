@@ -27,7 +27,8 @@ package object admin {
 
   def createBaseProps(): Properties = {
     val props = new Properties()
-    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
+    //props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
+    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:29092")
     props
   }
 

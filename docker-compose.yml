@@ -22,6 +22,7 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
@@ -57,6 +58,9 @@ services:
                            kafka-topics --create --topic card-undefined --if-not-exists --zookeeper zookeeper:2181 --partitions 2 --replication-factor 1 && \
                            kafka-topics --create --topic daily-success-aggregates --if-not-exists --zookeeper zookeeper:2181 --partitions 2 --replication-factor 1 && \
                            kafka-topics --create --topic daily-declined-aggregates --if-not-exists --zookeeper zookeeper:2181 --partitions 2 --replication-factor 1 && \
+                           kafka-topics --create --topic monthly-success-aggregates --if-not-exists --zookeeper zookeeper:2181 --partitions 2 --replication-factor 1 && \
+                           kafka-topics --create --topic monthly-declines-aggregates --if-not-exists --zookeeper zookeeper:2181 --partitions 2 --replication-factor 1 && \
+                           kafka-topics --create --topic monthly-all-status-aggregates --if-not-exists --zookeeper zookeeper:2181 --partitions 2 --replication-factor 1 && \
                            sleep infinity'"
     environment:
       # The following settings are listed here only to satisfy the image's requirements.
@@ -64,7 +68,7 @@ services:
       KAFKA_BROKER_ID: ignored
       KAFKA_ZOOKEEPER_CONNECT: ignored
 
-  kafka-producers:
+  kafka-gateway-producers:
     image: zip-coding-challenge:latest
     depends_on:
       - kafka
@@ -74,21 +78,46 @@ services:
                            java -cp /opt/lib/zip-coding-challenge-assembly-0.1.0-SNAPSHOT.jar \
                            au.com.zip.producer.PaymentGatewayProducer'"
 
-  kafka-consumers:
+  kafka-card-producers:
     image: zip-coding-challenge:latest
     depends_on:
       - kafka
       - kafka-topics
     command: "bash -c 'echo Waiting for Kafka to be ready... && \
+                             cub kafka-ready -b kafka:29092 1 20 && \
+                             java -cp /opt/lib/zip-coding-challenge-assembly-0.1.0-SNAPSHOT.jar \
+                             au.com.zip.producer.CardTransactionProducer'"
+
+  kafka-consumers:
+    image: zip-coding-challenge:latest
+    depends_on:
+      - kafka
+      - kafka-topics
+      - kafka-gateway-producers
+    command: "bash -c 'echo Waiting for Kafka to be ready... && \
                                cub kafka-ready -b kafka:29092 1 20 && \
                                java -cp /opt/lib/zip-coding-challenge-assembly-0.1.0-SNAPSHOT.jar \
                                au.com.zip.consumer.AuthorizedTransactionConsumer'"
+
+  kafka-authorization-stream:
+    image: zip-coding-challenge:latest
+    depends_on:
+      - kafka
+      - kafka-topics
+      - kafka-gateway-producers
+      - kafka-card-producers
+    command: "bash -c 'echo Waiting for Kafka to be ready... && \
+                               cub kafka-ready -b kafka:29092 1 20 && \
+                               java -cp /opt/lib/zip-coding-challenge-assembly-0.1.0-SNAPSHOT.jar \
+                               au.com.zip.stream.AuthorisationStream'"
 
   kafka-daily-aggregates-stream:
     image: zip-coding-challenge:latest
     depends_on:
       - kafka
       - kafka-topics
+      - kafka-card-producers
+      - kafka-gateway-producers
     command: "bash -c 'echo Waiting for Kafka to be ready... && \
                                  cub kafka-ready -b kafka:29092 1 20 && \
                                  java -cp /opt/lib/zip-coding-challenge-assembly-0.1.0-SNAPSHOT.jar \
@@ -99,6 +128,8 @@ services:
     depends_on:
       - kafka
       - kafka-topics
+      - kafka-card-producers
+      - kafka-gateway-producers
     command: "bash -c 'echo Waiting for Kafka to be ready... && \
                                  cub kafka-ready -b kafka:29092 1 20 && \
                                  java -cp /opt/lib/zip-coding-challenge-assembly-0.1.0-SNAPSHOT.jar \
@@ -161,7 +192,7 @@ services:
     ports:
       - "9000:9000"
     environment:
-      KAFKA_BROKERCONNECT: "localhost:9092"
+      KAFKA_BROKERCONNECT: "kafka:29092"
       JVM_OPTS: "-Xms16M -Xmx48M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify"
-#    depends_on:
-#      - kafka
+    depends_on:
+      - kafka
